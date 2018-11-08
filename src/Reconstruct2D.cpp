@@ -313,10 +313,6 @@ void projectPoints(vector<Point> &points, vector<PState> &pStates, vector<vector
 						// intersect normal of point k with circle fit of point i
 						Point pp[2];
 
-						// DEBUG
-						if (k == 4)
-							cout << "";
-
 						// if there are intersections
 						if (intersectCircleLine(circles[i], points[k], normals[k], pp[0], pp[1]))
 						{
@@ -398,16 +394,13 @@ void denoisePointsLinearFunction(vector<Point> &points, vector<PState> &pStates,
 	for (iter = 0; iter < 10; iter++)
 	{
 		// DEBUG
-		cout << "iter #" << iter << ":";
+		if (DEBUG)
+			cout << "iter #" << iter << ":";
 
 		for (i = 0; i < (int)points.size(); i++)
 		{
 			if ((pStates[i] == PState::MANIFOLD) || (pStates[i] == PState::SHARP) || (pStates[i] == PState::LEAF))
 			{
-				// DEBUG
-				if (i == 40)
-					cout << "";
-
 				int tIndex[2], t[2] = { neighbors[i][0], neighbors[i][1] };
 				Point currP = denoisedPoints[i];
 
@@ -461,13 +454,16 @@ void denoisePointsLinearFunction(vector<Point> &points, vector<PState> &pStates,
 					}
 				}
 
-				// DEBUG
-				if (abs(ydMin) > 0.001)
+				if (DEBUG)
 				{
-					cout << " " << i;
+					// DEBUG
+					if (abs(ydMin) > 0.001)
+					{
+						cout << " " << i;
 
-					if (iter > 10)
-						cout << "";
+						if (iter > 10)
+							cout << "";
+					}
 				}
 
 				newPoints[i] = denoisedPoints[i] + normals[i]*(ydMin - yd[0]);
@@ -480,7 +476,8 @@ void denoisePointsLinearFunction(vector<Point> &points, vector<PState> &pStates,
 		}
 
 		// DEBUG
-		cout << endl;
+		if (DEBUG)
+			cout << endl;
 
 		denoisedPoints = newPoints;
 	}
@@ -501,16 +498,13 @@ void denoisePointsCentroid(vector<Point> &points, vector<PState> &pStates,
 	for (iter = 0; iter < 1; iter++)
 	{
 		// DEBUG
-		cout << "iter #" << iter << ":";
+		if (DEBUG)
+			cout << "iter #" << iter << ":";
 
 		for (i = 0; i < (int)points.size(); i++)
 		{
 			if ((pStates[i] == PState::MANIFOLD) || (pStates[i] == PState::SHARP) || (pStates[i] == PState::LEAF))
 			{
-				// DEBUG
-				if (i == 73)
-					cout << "";
-
 				int tIndex[2], t[2] = { neighbors[i][0], neighbors[i][1] };
 				Point currP = denoisedPoints[i];
 
@@ -562,8 +556,9 @@ void denoisePointsCentroid(vector<Point> &points, vector<PState> &pStates,
 #endif
 
 				// DEBUG
-				if (currP.distance(centroid) > 0.001)
-					cout << " " << i;
+				if (DEBUG)
+					if (currP.distance(centroid) > 0.001)
+						cout << " " << i;
 
 				newPoints[i] = centroid;
 
@@ -574,7 +569,8 @@ void denoisePointsCentroid(vector<Point> &points, vector<PState> &pStates,
 		}
 
 		// DEBUG
-		cout << endl;
+		if (DEBUG)
+			cout << endl;
 
 		denoisedPoints = newPoints;
 	}
@@ -1110,10 +1106,6 @@ bool increaseNHood(ANNkd_tree *kdTree, ANNpointArray ann_points, vector<Point> &
 	{
 		indices.resize(3);
 		indices[0] = currP;
-
-		// DEBUG
-		if (currP == 1)
-			cout << "";
 
 		for (i = 0; i < 2; i++)
 		{
@@ -1783,10 +1775,6 @@ Point minimizeVertex(vector<Point> &points, vector<Point> &ppoints, vector<vecto
 	vector<int> samplesSide[2];
 	Point xx[2];
 
-	// DEBUG
-	if (currP == 53)
-		cout << "";
-
 	for (i = 0; i < 2; i++)
 	{
 		samplesSide[i].push_back(currP);
@@ -2067,10 +2055,6 @@ Point minimizeVertex(vector<Point> &points, vector<Point> &ppoints, vector<vecto
 	Point baseP = ppoints[currP] + nn*dd;
 #endif
 
-	// TEST
-	if (currP == 53)
-		cout << "";
-
 	double sumD = 0.0;
 
 	// DEBUG
@@ -2218,10 +2202,6 @@ Point minimizeVertex(vector<Point> &points, vector<Point> &ppoints, vector<vecto
 	int i, j, sampleCount[2];
 	vector<int> samplesSide[2];
 	Point xx[2];
-
-	// DEBUG
-	if (curr == 53)
-		cout << "";
 
 	for (i = 0; i < 2; i++)
 	{
@@ -2576,7 +2556,8 @@ void denoisePointsL2(vector<Point> &points, vector<PState> &pStates,
 //	while ((iter < 1) && !converged)
 	{
 		// DEBUG
-		cout << "iteration #" << iter << ", converged:";
+		if (DEBUG)
+			cout << "iteration #" << iter << ", converged:";
 
 		converged = true;
 
@@ -2595,7 +2576,8 @@ void denoisePointsL2(vector<Point> &points, vector<PState> &pStates,
 						convergedP[i] = true;
 
 						// DEBUG
-						cout << " " << i;
+						if (DEBUG)
+							cout << " " << i;
 					}
 					else
 					{
@@ -2614,16 +2596,20 @@ void denoisePointsL2(vector<Point> &points, vector<PState> &pStates,
 		iter++;
 
 		// DEBUG
-		cout << endl;
+		if (DEBUG)
+			cout << endl;
 	}
 
-	cout << "not converged:";
+	if (DEBUG)
+	{
+		cout << "not converged:";
 
-	for (i = 0; i < (int)points.size(); i++)
-		if ((pStates[i] == PState::MANIFOLD) && !convergedP[i])	// TODO: also handle LEAF vertices
-			cout << " #" << i;
+		for (i = 0; i < (int)points.size(); i++)
+			if ((pStates[i] == PState::MANIFOLD) && !convergedP[i])	// TODO: also handle LEAF vertices
+				cout << " #" << i;
 
-	cout << endl;
+		cout << endl;
+	}
 }
 
 /*
@@ -2691,9 +2677,6 @@ void collectIntersectingSegmentsInNHood(int p, vector<vector<int> > *nhood, vect
 				prevP = currP;
 				currP = nextP;
 			}
-
-			if (currP == startP)
-				cout << "";
 
 			intersects[i] = ((currP != -1) && (currP != p) && (currP != startP) && (nhoodSet.find(currP) == nhoodSet.end()));
 		}
@@ -3106,8 +3089,9 @@ void solveLagrangeKWithBounds(int k, int *v, vector<Point> &vertices, vector<Poi
 		double x0 = normals[vIndex].dot(vertices[vIndex] - samples[vIndex]);	// current displacement
 		x0 += x[i];
 
-		if (abs(x0) > noise[vIndex])
-			cout << "";
+		if (DEBUG)
+			if (abs(x0) > noise[vIndex])
+				cout << "";
 	}
 }
 
@@ -3500,8 +3484,9 @@ void denoiseLSLinearConstraintsIterative(vector<Point> &points, vector<PState> &
 		isSharp[i] = !hasInsideLine(testP, testNoise, tp, tv);
 
 		// DEBUG
-		if (isSharp[i])
-			cout << "#" << vertices[i] << " is " << (isSharp[i] ? "" : "not ") << "sharp" << endl;
+		if (DEBUG)
+			if (isSharp[i])
+				cout << "#" << vertices[i] << " is " << (isSharp[i] ? "" : "not ") << "sharp" << endl;
 	}
 
 	int lastV = vertices[0];
@@ -3513,10 +3498,6 @@ void denoiseLSLinearConstraintsIterative(vector<Point> &points, vector<PState> &
 	while (lastV != -1)
 	{
 		int k = 2;
-
-		// DEBUG
-		if (lastV == 9)
-			cout << "";
 
 		// expand number of concurrently considered vertices:
 		// TODO: do just once (in first iteration)
@@ -3907,10 +3888,6 @@ bool Reconstruct2D::reconstructNoisy()
 			for (i = 0; i < 2; i++)
 				oldNhood[i] = nhood[i][currP];
 
-			// DEBUG
-			if ((iterations == 10) && (currP == 99))
-				cout << "";
-
 #ifdef SHARPLEAF
 			// LEAF candidate: check if point is CONFORM and has exactly 1 overlap, with >=3 MANIFOLD points
 			bool leafOverlap = false;
@@ -4245,11 +4222,6 @@ bool Reconstruct2D::reconstructNoisy()
 				bool existsClosedCurve = false;
 				int openCurveCount = 0;
 
-				// DEBUG
-//				if ((iterations == 26) && (currP == 34))
-				if ((iterations == 71) && (currP == 99))
-					cout << "";
-
 				collectIntersectingSegmentsInNHood(currP, nhood, pStates, neighbors, segments, existsClosedCurve, openCurveCount);
 
 				// remove points which have a closed segment (all MANIFOLD points), which intersects twice with nhood disc
@@ -4368,10 +4340,6 @@ bool Reconstruct2D::reconstructNoisy()
 						if ((neighbors[n][0] != -1) || (neighbors[n][1] != -1))	// test only points with overlaps
 						{
 							bool isConsistent = true;
-
-							// DEBUG
-							if ((iterations == 1) && (currP == 91) && (n == 91))
-								cout << "";
 
 							// verify that SHARP points have both MANIFOLD neighbors
 							if ((pStates[n] == PState::SHARP) &&
